@@ -6,6 +6,7 @@ Minimal Mod Manager (MMM) is a script/program used to make the process of updati
 
 # Requirements 
 https://pypi.org/project/pynxm/
+
 https://pypi.org/project/patool/
 
 # Setup
