@@ -5,7 +5,7 @@ import shutil
 import configparser
 import webbrowser
 import sys
-
+import patoolib
 clear = 'cls' if os.name == 'nt' else 'clear'
 os.system(clear)
 
@@ -151,15 +151,18 @@ def main():
             for file in file_dict:
                 
                 # Add the number we get above to the folders name
-                fixed_name = f"{file.split('.')[0]}({file_dict[file]}).{file.split('.')[1]}" if file_dict[file] != 0 else f"{file}"
-                shutil.unpack_archive(os.path.join(user_downloads,fixed_name),sources_dir if extract_dir == '' else extract_dir,fixed_name.split('.')[-1])
+                
+                suffix_len = len(file.split('.')[-1])+1 #remove the period 
+                
+                fixed_name = f"{file[:-suffix_len]}({c}){file[-suffix_len:]}" if file_dict[file] != 0 else f"{file}"
+                patoolib.extract_archive(os.path.join(user_downloads,fixed_name),-1,sources_dir if extract_dir == '' else extract_dir,fixed_name.split('.')[-1])
+                # shutil.unpack_archive(os.path.join(user_downloads,fixed_name),sources_dir if extract_dir == '' else extract_dir,fixed_name.split('.')[-1])
                 shutil.move(os.path.join(user_downloads,fixed_name),os.path.join(extract_dir,fixed_name))
                 print(f'MOVED FILE!',os.path.join(user_downloads,fixed_name),os.path.join(sources_dir if extract_dir == '' else extract_dir,fixed_name))
 
             if question(f'Would you like to delete the old archives from mods folder? \n{delete_files}') == True:
                 for file in delete_files:
                     os.remove(os.path.join(sources_dir,file)) 
-    os.system(clear)
     print('\nFinished tasks!')
 
 while game_selection() == 'FINISHED':
