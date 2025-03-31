@@ -4,8 +4,6 @@
 Minimal Mod Manager (MMM) is a script/program used to make the process of updating mods from NexusMods. It works by reading the hash of an archive downloaded from Nexusmods, checks if an update is available, and extracts it to a specified folder.  
 
 # Requirements 
-https://pypi.org/project/patool/
-
 https://pypi.org/project/pynxm/
 
 
