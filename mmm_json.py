@@ -6,6 +6,7 @@ import webbrowser
 import sys
 import patoolib
 import json 
+from difflib import SequenceMatcher as sm
 clear = 'cls' if os.name == 'nt' else 'clear'
 
 os.system(clear)
@@ -178,21 +179,35 @@ def main():
         if os.path.isdir(os.path.join(sources_dir,file)) == False:
             if file.split('.')[-1] in ('zip','rar','7z'):
                 file_hash = hashlib.md5(open(os.path.join(sources_dir,file), 'rb').read()).hexdigest()
-                try:
-                    our_file = dict(nxm.mod_search(game,file_hash)[0])
-                    nexus_file = nxm.mod_file_list(game,dict(nxm.mod_search(game,file_hash)[0])['mod']['mod_id'])['files'][-1]
-                    if our_file['file_details']['uid'] == nexus_file['uid']:
-                        print(f"\n{file.split('-')[0]} is at the newest version :)")
-                    else:
-                        webbrowser.open(f"https://www.nexusmods.com/{game}/mods/{our_file['mod']['mod_id']}?tab=files&file_id={nexus_file['file_id']}")
-                        print(f"\n{file} website found... opening: \n     https://www.nexusmods.com/{game}/mods/{our_file['mod']['mod_id']}?tab=files&file_id={nexus_file['file_id']}")
+                mod_dict = {}
+                our_file = dict(nxm.mod_search(game,file_hash)[0])
 
-                        delete_files.append(file)
-                        downloading_files.append(nexus_file['file_name']) # Append the newest file name as thats probably the one we want, if not, shoot. 
-                except:
-                    
-                    print(f'\nfailed to find mods website {file}')
-                
+                for mod in nxm.mod_file_list(game,dict(nxm.mod_search(game,file_hash)[0])['mod']['mod_id'])['files']:
+                    if mod['category_name'] in ('OPTIONAL','MAIN'):
+                        if len(mod_dict) == 0:
+                            mod_dict.update({our_file['file_details']['name']:{'float':0.0,'file_id':'','file_name':''}})
+                        
+                        if sm(None,our_file['file_details']['name'],our_file['file_details']['name']).ratio() > mod_dict[our_file['file_details']['name']]['float']:
+                            print('True',our_file['file_details']['name'],' is larger than existing dict')
+                            mod_dict.update({our_file['file_details']['name']:{'float':float(sm(None,our_file['file_details']['name'],mod['name']).ratio()),'file_id':mod['file_id'],'file_name':mod['file_name']}})
+ 
+                        # compare uid
+                        if mod['uid'] == our_file['file_details']['uid']:
+                            print('our_file UID not archived, up to date')
+                            update = False
+                            break
+                        else:
+                            update = True
+
+                if update == False:
+                    print(f"\n{file.split('-')[0]} is at the newest version :)")
+                else:
+                    webbrowser.open(f"https://www.nexusmods.com/{game}/mods/{our_file['mod']['mod_id']}?tab=files&file_id={mod_dict[our_file['file_details']['name']]['file_id']}")
+                    print(f"\n{file} website found... opening: \n     https://www.nexusmods.com/{game}/mods/{our_file['mod']['mod_id']}?tab=files&file_id={mod_dict[our_file['file_details']['name']]['file_id']}")
+
+                    delete_files.append(file)
+                    downloading_files.append(mod_dict[our_file['file_details']['name']]['file_name']) # Append the newest file name as thats probably the one we want, if not, shoot. 
+
 
     if len(downloading_files) != 0:
         if question('Are you finished downloading the mods? Would you like to extract them to your current directory or override folder?') == False:
