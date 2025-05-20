@@ -82,6 +82,7 @@ def game_selection():
         config['Settings']['api_key'] = input('No API key set, please provide one here: \n')
         
         write_data(path,config)
+        os.system(clear)
 
     c = 0
     val = {}
@@ -219,8 +220,8 @@ def main():
                 fixed_name = f"{file[:-suffix_len]}({c}){file[-suffix_len:]}" if file_dict[file] != 0 else f"{file}"
                 patoolib.extract_archive(os.path.join(user_downloads,fixed_name),-1,sources_dir if extract_dir == '' else extract_dir,fixed_name.split('.')[-1])
                 # shutil.unpack_archive(os.path.join(user_downloads,fixed_name),sources_dir if extract_dir == '' else extract_dir,fixed_name.split('.')[-1])
-                shutil.move(os.path.join(user_downloads,fixed_name),os.path.join(extract_dir,fixed_name))
-                print(f'MOVED FILE!',os.path.join(user_downloads,fixed_name),os.path.join(sources_dir if extract_dir == '' else extract_dir,fixed_name))
+                shutil.move(os.path.join(user_downloads,fixed_name),os.path.join(archives_dir,fixed_name))
+                print(f'MOVED FILE!',os.path.join(user_downloads,fixed_name),os.path.join(sources_dir if archives_dir == '' else archives_dir,fixed_name))
 
             if question(f'Would you like to delete the old archives from mods folder? \n{delete_files}') == True:
                 for file in delete_files:
