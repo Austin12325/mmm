@@ -7,10 +7,19 @@ import webbrowser
 import sys
 import patoolib
 import json 
-# clear = 'cls' if os.name == 'nt' else 'clear'
-clear = ''
+clear = 'cls' if os.name == 'nt' else 'clear'
+
 os.system(clear)
-path = r'C:\Users\Austin\Documents\Minimal Mod Manager'
+
+def question(string):
+    print()
+    print(string)
+    print('Continue? [y], n')
+    if input().lower() == 'n':
+        return(False)
+    else:
+        return(True)
+    
 def find_data_file(filename):
     if getattr(sys, "frozen", False):
         # The application is frozen
@@ -21,7 +30,7 @@ def find_data_file(filename):
         datadir = os.path.dirname(__file__)
     return datadir
 
-def create_data():
+def create_data(path):
     x = {'Settings':
             {
                 'api_key':''
@@ -40,17 +49,17 @@ def create_data():
                         }
                     }
             }
-    with open(os.path.join(path,'config.json'), 'w') as file:
+    with open(path, 'w') as file:
         json.dump(x,file)
 
-def write_data(load):
+def write_data(path,load):
     # used for adding to variation
     # load['variation'][list(write)[0]] = write[list(write)[0]]
-    with open(os.path.join(path,'config.json'), 'w') as file:
+    with open(path, 'w') as file:
         json.dump(load,file)
         
 
-def load_data():
+def load_data(path):
     x = {'name':'oblivionremastered',
             'variation':{
                 'ue4':{
@@ -58,7 +67,7 @@ def load_data():
                     'archive_path':'f'
                 }
             }}
-    with open(os.path.join(path,'config.json'), 'r') as file:
+    with open(path, 'r') as file:
         return(json.load(file))
 
 def game_selection():
@@ -68,19 +77,23 @@ def game_selection():
     global api_key 
 
     file_dir = find_data_file(__file__)
-    
+    path = os.path.join(file_dir,'config.json')
     # Reads the config file asking for users selection
+    #fix me
     try:
 
-        config = load_data()
-        print(config['games'])
+        config = load_data(path)
         if config['Settings']['api_key'] == "":
             config['Settings']['api_key'] = input('No API key set, please provide one here: \n')
             
-            write_data(config)
+            write_data(path,config)
     except:
         create_data()
-        config = load_data()
+        config = load_data(path)
+        if config['Settings']['api_key'] == "":
+            config['Settings']['api_key'] = input('No API key set, please provide one here: \n')
+            
+            write_data(path,config)
     c = 0
     val = {}
     for k in config['games']:
@@ -115,56 +128,48 @@ def game_selection():
         config['games'][game_input]['settings']['variation'].update(orig_var)
         
         # config['games'][game_input]['settings']['variation']
-        write_data(config)
+        write_data(path,config)
         os.system(clear)
         return 'FINISHED'
 
     elif question == 'd':
         os.system(clear)
-        c = -1
-        for key in config:
-            if key not in ('DEFAULT','Settings'):
-                print(c,')',key)
+        c = 0
+        var_val = {}
+        for var in config['games']:
+            if var not in ('default','Settings'):
+                print(f'{c} ) {var}')
+                var_val.update({c:var})
             c+=1
         print('-------')
         question1 = input('game to delete:\n')
-        if question1.isnumeric() == True:
-            print("REMOVING ",config[config.sections()[int(question1)]]['name'])
-            config.remove_section(config[config.sections()[int(question1)]]['name'])
-        else:
-            config.remove_section(question1)
 
-        with open(os.path.join(file_dir,'mmm_config.ini'),'w') as configfile:
-            config.write(configfile)
-            configfile.close()
-        
-        os.system(clear)
+        print("REMOVING ",config['games'][var_val[int(question1)]])
+        config['games'].pop(var_val[int(question1)])
+        write_data(path,config)
+
         return 'FINISHED'
     else:
+        game = config['games'][val[int(question)]]['name']
         # Run thing using this game
-        print(len(config['games'][val[int(question)]]['settings']['variation']))
+        var_val = {}
+        # As the question of which variation if greater than 1 
+        if len(config['games'][val[int(question)]]['settings']['variation']) >= 1:
+            clear
+            c = 1
+            for var in config['games'][val[int(question)]]['settings']['variation']:
+                print(f'{c} ) {var}')
+                var_val.update({c:var})
+                c+=1
+            print(var_val)
         
-        
-        
-        
-        
-
-
-
-        game = config[config.sections()[int(question)]]['name']
-        archives_dir = config[config.sections()[int(question)]]['archives_dir']
-        extract_dir = config[config.sections()[int(question)]]['extract_dir'] 
+            var_pick = input('Which variation would you like to manage?:\n')
+        archives_dir = config['games'][val[int(question)]]['settings']['variation'][var_val[int(var_pick)]]['archive_path']
+        extract_dir = config['games'][val[int(question)]]['settings']['variation'][var_val[int(var_pick)]]['mod_path'] 
         api_key = config['Settings']['api_key'] 
         return 'PASS'
 
-def question(string):
-    print()
-    print(string)
-    print('Continue? [y], n')
-    if input().lower() == 'n':
-        return(False)
-    else:
-        return(True)
+
 
 def main():
     os.system(clear)
@@ -236,20 +241,7 @@ def main():
                     
     print('\nFinished tasks!')
     input()
-    
-x = {'name':'oblivionremastered',
-        'variation':{
-            'ue6':{
-                'mod_path':'path_to_modding_folder',
-                'archive_path':'f'
-            }
-        }}
-y = { 'ue4':{
-                'mod_path':'path_to_modding_folder',
-                'archive_path':'f'
-            }
-        }
 
-game_selection()
-# while game_selection() == 'FINISHED':
-#     pass
+while game_selection() == 'FINISHED':
+    pass
+main()
