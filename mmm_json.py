@@ -229,7 +229,8 @@ def main():
     print('\nFinished tasks!')
     input()
 
-if os.path.join(find_data_file(__file__),'config.json') not in os.listdir(find_data_file(__file__)):
+
+if 'config.json' not in os.listdir(find_data_file(__file__)):
     create_data(os.path.join(find_data_file(__file__),'config.json'))
 
 while game_selection() == 'FINISHED':
