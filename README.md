@@ -36,12 +36,21 @@ x------------------------------------x
 |                                    | 
 |  Game Name:                        |
 |                                    |
+|  Variation:                        |
+|                                    |
 |  Where archives are stored:        |
 |                                    |
 |  Where to extract to:              |
 |                                    |
 x------------------------------------x
 ```
+**Game Name**: The name found in your URL bar when browsing nexusmods, ex.) Darktide would be 'warhammer40kdarktide'
+
+**Variation**: Can be anything, its used for games that have multiple different mod folders like in the case of Oblivion Remastered (ue4ss, pak mods, script extenders) this it will let you chose later which variation you would like to run the update operation on.
+
+**Where Archives are stored**: For this program to work you need to store your zip files to check againt the zip files hosted on Nexusmods, personally I keep my zip files in my mods folder.
+
+**Where to extract to**: This is where your mod files are stored, a drawback is that if the mods folders structure differ it might be challenging to manage and multiple variations will need to be made.
 
 ### Selected Game Menu
 ```
