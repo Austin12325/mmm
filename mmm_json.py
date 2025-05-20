@@ -2,7 +2,6 @@ import os
 import hashlib 
 import pynxm
 import shutil
-import configparser
 import webbrowser
 import sys
 import patoolib
@@ -58,7 +57,6 @@ def write_data(path,load):
     with open(path, 'w') as file:
         json.dump(load,file)
         
-
 def load_data(path):
     x = {'name':'oblivionremastered',
             'variation':{
@@ -79,21 +77,12 @@ def game_selection():
     file_dir = find_data_file(__file__)
     path = os.path.join(file_dir,'config.json')
     # Reads the config file asking for users selection
-    #fix me
-    try:
+    config = load_data(path)
+    if config['Settings']['api_key'] == "":
+        config['Settings']['api_key'] = input('No API key set, please provide one here: \n')
+        
+        write_data(path,config)
 
-        config = load_data(path)
-        if config['Settings']['api_key'] == "":
-            config['Settings']['api_key'] = input('No API key set, please provide one here: \n')
-            
-            write_data(path,config)
-    except:
-        create_data()
-        config = load_data(path)
-        if config['Settings']['api_key'] == "":
-            config['Settings']['api_key'] = input('No API key set, please provide one here: \n')
-            
-            write_data(path,config)
     c = 0
     val = {}
     for k in config['games']:
@@ -169,8 +158,6 @@ def game_selection():
         api_key = config['Settings']['api_key'] 
         return 'PASS'
 
-
-
 def main():
     os.system(clear)
     file_hash = []
@@ -242,6 +229,10 @@ def main():
     print('\nFinished tasks!')
     input()
 
+if os.path.join(find_data_file(__file__),'config.json') not in os.listdir(find_data_file(__file__)):
+    create_data(os.path.join(find_data_file(__file__),'config.json'))
+
 while game_selection() == 'FINISHED':
     pass
+
 main()
