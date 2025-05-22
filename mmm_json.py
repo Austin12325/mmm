@@ -79,6 +79,7 @@ def game_selection():
     path = os.path.join(file_dir,'config.json')
     # Reads the config file asking for users selection
     config = load_data(path)
+    print('config loaded')
     if config['Settings']['api_key'] == "":
         config['Settings']['api_key'] = input('No API key set, please provide one here: \n')
         
@@ -101,12 +102,9 @@ def game_selection():
         variation = str(input('\nWhat types of mods\n(used for picking between multiple mod formats per game)\n(can be anything):\n'))
         archives_input = str(input('\nWhere archives are stored:\n'))
         extract_input = str(input('\nWhere to extract to:\n(mods folder)\n'))
-        try:
-            orig_var = config['games'][game_input]['settings']['variation']
-        except:
-            orig_var = ''
-
-        config['games'][game_input] = {'name':game_input,
+        
+        if game_input not in config['games']:
+            config['games'][game_input] = {'name':game_input,
                 'settings':{
                     'variation':{
                         variation:{
@@ -116,9 +114,14 @@ def game_selection():
                     }
                 }
             }
-        config['games'][game_input]['settings']['variation'].update(orig_var)
         
-        # config['games'][game_input]['settings']['variation']
+        # modify data based on our choices
+        config['games'][game_input]['name'] = game_input
+        config['games'][game_input]['settings']['variation'][variation] = {
+                            'mod_path':extract_input,
+                            'archive_path':archives_input
+                        }
+        
         write_data(path,config)
         os.system(clear)
         return 'FINISHED'
@@ -126,17 +129,44 @@ def game_selection():
     elif question == 'd':
         os.system(clear)
         c = 0
-        var_val = {}
-        for var in config['games']:
-            if var not in ('default','Settings'):
-                print(f'{c} ) {var}')
-                var_val.update({c:var})
-            c+=1
+        game_val = {}
         print('-------')
-        question1 = input('game to delete:\n')
+        print('1 ) Variation for a game')
+        print('2 ) Game from Manager')
+        question = input('thing to delete:\n')
+        os.system(clear)
+        if question == '2':
+            # list games for deletion
+            for var in config['games']:
+                if var not in ('default','Settings'):
+                    print(f'{c} ) {var}')
+                    game_val.update({c:var})
+                c+=1
+            print('-------')
+            question = input('game to delete:\n')
 
-        print("REMOVING ",config['games'][var_val[int(question1)]])
-        config['games'].pop(var_val[int(question1)])
+            print("REMOVING ",config['games'][game_val[int(question)]])
+            config['games'].pop(game_val[int(question)])
+        else:
+            var_val = {}
+            c = 0
+            # list games for deletion
+            for var in config['games']:
+                if var not in ('default','Settings'):
+                    print(f'{c} ) {var}')
+                    game_val.update({c:var})
+                c+=1
+            print('-------')
+            print('SET VAR')
+            question1 = input('Select Game:\n')
+            c = 1
+            for var in config['games'][game_val[int(question1)]]['settings']['variation']:
+                if var not in ('default','Settings'):
+                    print(f'{c} ) {var}')
+                    var_val.update({c:var})
+                c+=1
+            question2 = input('Variation to delete:\n')
+            config['games'][game_val[int(question1)]]['settings']['variation'].pop(var_val[int(question2)])
         write_data(path,config)
 
         return 'FINISHED'
