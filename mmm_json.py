@@ -89,7 +89,7 @@ def game_selection():
             print(c,')',config['games'][k]['name'])
             val.update({c:k}) 
         c+=1
-    question = input('-------\nInput Number to select game,\n "a" to add game,\n "d" to delete game\n-------\n')
+    question = input('-------\nInput Number to select game,\n "a" to add game,\n "d" to open deletion menu\n-------\n')
     os.system(clear)
 
     if question == 'a':
