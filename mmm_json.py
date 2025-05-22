@@ -9,8 +9,6 @@ import json
 from difflib import SequenceMatcher as sm
 clear = 'cls' if os.name == 'nt' else 'clear'
 
-os.system(clear)
-
 def question(string):
     print()
     print(string)
@@ -53,8 +51,6 @@ def create_data(path):
         json.dump(x,file)
 
 def write_data(path,load):
-    # used for adding to variation
-    # load['variation'][list(write)[0]] = write[list(write)[0]]
     with open(path, 'w') as file:
         json.dump(load,file)
         
@@ -74,7 +70,7 @@ def game_selection():
     global archives_dir
     global extract_dir  
     global api_key 
-
+    os.system(clear)
     file_dir = find_data_file(__file__)
     path = os.path.join(file_dir,'config.json')
     # Reads the config file asking for users selection
@@ -93,10 +89,9 @@ def game_selection():
             print(c,')',config['games'][k]['name'])
             val.update({c:k}) 
         c+=1
-    print('-------\nInput Number to select game,\n "a" to add game,\n "d" to delete game\n-------')
-
-    question = input()
+    question = input('-------\nInput Number to select game,\n "a" to add game,\n "d" to delete game\n-------\n')
     os.system(clear)
+
     if question == 'a':
         game_input = str(input('\nGame Name:\n(Needs to be the name on Nexus)\n'))
         variation = str(input('\nWhat types of mods\n(used for picking between multiple mod formats per game)\n(can be anything):\n'))
@@ -130,23 +125,27 @@ def game_selection():
         os.system(clear)
         c = 0
         game_val = {}
-        print('-------')
+ 
         print('1 ) Variation for a game')
         print('2 ) Game from Manager')
+        print('-------')
         question = input('thing to delete:\n')
         os.system(clear)
         if question == '2':
-            # list games for deletion
-            for var in config['games']:
-                if var not in ('default','Settings'):
-                    print(f'{c} ) {var}')
-                    game_val.update({c:var})
-                c+=1
-            print('-------')
-            question = input('game to delete:\n')
+            if input(f"You're about to delete a game mod config, are you sure?\ntype: 'yes' to continue\n") == 'yes':
+                # list games for deletion
+                for var in config['games']:
+                    if var not in ('default','Settings'):
+                        print(f'{c} ) {var}')
+                        game_val.update({c:var})
+                    c+=1
+                print('-------')
+                question = input('game to delete:\n')
 
-            print("REMOVING ",config['games'][game_val[int(question)]])
-            config['games'].pop(game_val[int(question)])
+                print("REMOVING ",config['games'][game_val[int(question)]])
+                config['games'].pop(game_val[int(question)])
+            else:
+                return 'FINISHED'
         else:
             var_val = {}
             c = 0
@@ -157,8 +156,8 @@ def game_selection():
                     game_val.update({c:var})
                 c+=1
             print('-------')
-            print('SET VAR')
             question1 = input('Select Game:\n')
+            os.system(clear)
             c = 1
             for var in config['games'][game_val[int(question1)]]['settings']['variation']:
                 if var not in ('default','Settings'):
@@ -174,17 +173,19 @@ def game_selection():
         game = config['games'][val[int(question)]]['name']
         # Run thing using this game
         var_val = {}
-        # As the question of which variation if greater than 1 
-        if len(config['games'][val[int(question)]]['settings']['variation']) >= 1:
-            clear
-            c = 1
-            for var in config['games'][val[int(question)]]['settings']['variation']:
-                print(f'{c} ) {var}')
-                var_val.update({c:var})
-                c+=1
-            print(var_val)
-        
+        # Ask the question of which variation if greater than 1 
+        c = 1
+        for var in config['games'][val[int(question)]]['settings']['variation']:
+            print(f'{c} ) {var}')
+            var_val.update({c:var})
+            c+=1
+
+
+        if len(config['games'][val[int(question)]]['settings']['variation']) > 1:
             var_pick = input('Which variation would you like to manage?:\n')
+        else:
+            var_pick = 1
+
         archives_dir = config['games'][val[int(question)]]['settings']['variation'][var_val[int(var_pick)]]['archive_path']
         extract_dir = config['games'][val[int(question)]]['settings']['variation'][var_val[int(var_pick)]]['mod_path'] 
         api_key = config['Settings']['api_key'] 
@@ -218,12 +219,10 @@ def main():
                             mod_dict.update({our_file['file_details']['name']:{'float':0.0,'file_id':'','file_name':''}})
                         
                         if sm(None,our_file['file_details']['name'],our_file['file_details']['name']).ratio() > mod_dict[our_file['file_details']['name']]['float']:
-                            print('True',our_file['file_details']['name'],' is larger than existing dict')
                             mod_dict.update({our_file['file_details']['name']:{'float':float(sm(None,our_file['file_details']['name'],mod['name']).ratio()),'file_id':mod['file_id'],'file_name':mod['file_name']}})
  
                         # compare uid
                         if mod['uid'] == our_file['file_details']['uid']:
-                            print('our_file UID not archived, up to date')
                             update = False
                             break
                         else:
