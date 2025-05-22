@@ -13,7 +13,7 @@ https://pypi.org/project/patool/
 
 If a terminal window doesn't open when executing the appimage or exe try executing it through a terminal window. 
 When first opening the program you'll be met with a screen asking for your personal Nexusmods API key, which can be found [here](https://next.nexusmods.com/settings/api-keys) 
-After that has been entered it will store they key in mmm_config.ini, this config file also stores your game information when you add a game. 
+After that has been entered it will store they key in config.json, this config file also stores your game information when you add a game. 
 
 # Outline 
 
